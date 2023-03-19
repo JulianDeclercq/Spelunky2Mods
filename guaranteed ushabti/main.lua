@@ -1,3 +1,8 @@
+meta.name = "Guaranteed Ushabti"
+meta.version = "1.0"
+meta.description = "Any ushabti you pick up will be the correct one that hatches into Qilin."
+meta.author = "Jools"
+
 ITEM_USHABTI = 442
 
 set_callback(
