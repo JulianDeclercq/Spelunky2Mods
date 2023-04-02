@@ -28,13 +28,11 @@ set_callback(function(room_gen_ctx)
     return
   end
 
-  local tiles_margin, room_width, bleed = 2, 10, 1 -- TODO: Test without bleed
+  local tiles_margin, room_width, bleed = 2, 10, 1
   for x = 0, state.width - 1 do
         for y = 0, state.height - 1 do
           local room_template_here = get_room_template(x, y, 0)
-          --print(F'{x} {y}: {get_room_template_name(room_template_here)}({room_template_here})')
           if room_template_here == ROOM_TEMPLATE.VLAD_DRILL then
-            print(F'DRILL LEVEL! DRILL AT {x},{y}')
             local startX = tiles_margin + room_width * x - bleed
             DRILL_ZONE.startX = startX
             DRILL_ZONE.endX = startX + room_width + bleed
@@ -45,8 +43,7 @@ set_callback(function(room_gen_ctx)
           if y > 0 and x == DRILL_ZONE.column then
             local target = rooms_to_replace[room_template_here]
             if target ~= nil then
-              room_gen_ctx:set_room_template(x, y, 0, ROOM_TEMPLATE.CHUNK_AIR) -- check if this needs to be done in the context
-              print(F'REPLACED {target} at {x}, {y}')
+              room_gen_ctx:set_room_template(x, y, 0, ROOM_TEMPLATE.CHUNK_AIR)
             end
           end
         end
@@ -62,19 +59,6 @@ set_pre_tile_code_callback(function(x, y, l)
     return
   end    
 
-  --print(F'Replacing lava at {x}, {y}')
   spawn_liquid(ENT_TYPE.LIQUID_WATER, x, y)
   return true -- prevents the original tile (lava) from being spawned
 end, "lava")
-
--- REMOVE
-set_callback(function()
-  players[1]:give_powerup(ENT_TYPE.ITEM_POWERUP_UDJATEYE)
-  god(true)
-end, ON.LEVEL)
-
---[[
-
-1. ON.POST_ROOM_GENERATION
-2. ON.PRE_HANDLE_ROOM_TILES
-3. PROBABLY (depends on chunk?) callback, if wrong it's 2nd instead--]]
