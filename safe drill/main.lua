@@ -43,7 +43,7 @@ set_callback(function(room_gen_ctx)
           if y > 0 and x == DRILL_ZONE.column then
             local target = rooms_to_replace[room_template_here]
             if target ~= nil then
-              room_gen_ctx:set_room_template(x, y, 0, ROOM_TEMPLATE.CHUNK_AIR)
+              room_gen_ctx:set_room_template(x, y, 0, ROOM_TEMPLATE.NONE)
             end
           end
         end
