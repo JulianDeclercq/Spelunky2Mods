@@ -1,0 +1,12 @@
+{
+    "image_map": {
+		"bubble_grey.png": {
+			"Data/Textures/fx_small3.png": [
+				{
+					"from": [ 0, 0, 256, 128 ],
+					"to": [ 0, 256, 256, 384 ]
+				}
+			]
+		}
+    }
+}
