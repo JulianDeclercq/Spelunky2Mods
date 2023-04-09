@@ -47,15 +47,28 @@ heldItems = {
   { ENT_TYPE.ITEM_CAMERA,          "Camera" },
 }
 
+powerups = {
+  { "ankh",            "Ankh",            "", true,  ENT_TYPE.ITEM_POWERUP_ANKH },
+  { "kapala",          "Kapala",          "", true,  ENT_TYPE.ITEM_POWERUP_KAPALA },
+  { "alien_compass",   "Alien Compass",   "", true,  ENT_TYPE.ITEM_POWERUP_SPECIALCOMPASS },
+  { "climbing_gloves", "Climbing Gloves", "", false, ENT_TYPE.ITEM_POWERUP_CLIMBING_GLOVES },
+  { "spike_shoes",     "Spike Shoes",     "", true,  ENT_TYPE.ITEM_POWERUP_SPIKE_SHOES },
+  { "spring_shoes",    "Spring Shoes",    "", false, ENT_TYPE.ITEM_POWERUP_SPRING_SHOES },
+  { "bomb_paste",      "Bomb Paste",      "", true,  ENT_TYPE.ITEM_POWERUP_PASTE },
+  { "pitchers_mitt",   "Pitcher's Mitt",  "", false, ENT_TYPE.ITEM_POWERUP_PITCHERSMITT },
+  { "eggplant_crown",  "Eggplant Crown",  "", false, ENT_TYPE.ITEM_POWERUP_EGGPLANTCROWN },
+  { "true_crown",      "True Crown",      "", false, ENT_TYPE.ITEM_POWERUP_TRUECROWN },
+}
+
 register_option_int(OrderedName("health"), "Health", "", 20, 1, 99)
 register_option_int(OrderedName("bombs"), "Bombs", "", 20, 1, 99)
 register_option_int(OrderedName("ropes"), "Ropes", "", 20, 1, 99)
 
 local backwearOptions = ""
-for _, item in pairs(backwear) do
-  backwearOptions = backwearOptions .. item[2] .. "\0"
+for _, backwear in pairs(backwear) do
+  backwearOptions = backwearOptions .. backwear[2] .. "\0"
 end
-register_option_combo(OrderedName("backwear"), "Backwear", "", backwearOptions .. "\0", 1)
+register_option_combo(OrderedName("backwear"), "Backwear", "", backwearOptions .. "\0", 2)
 
 local heldItemOptions = ""
 for _, item in pairs(heldItems) do
@@ -63,20 +76,12 @@ for _, item in pairs(heldItems) do
 end
 register_option_combo(OrderedName("heldItem"), "Held item", "", heldItemOptions .. "\0", 1)
 
-register_option_bool(OrderedName("ankh"), "Ankh", "", true)
-register_option_bool(OrderedName("kapala"), "Kapala", "", true)
-register_option_bool(OrderedName("alien_compass"), "Alien Compass", "", true)
+for _, powerup in pairs(powerups) do
+  register_option_bool(OrderedName(powerup[1]), powerup[2], powerup[3], powerup[4])
+end
+
+-- special case since it has to be spawned and picked up rather than added as a powerup
 register_option_bool(OrderedName("elixir"), "Elixir", "", true)
-
-register_option_bool(OrderedName("climbing_gloves"), "Climbing Gloves", "", false)
-register_option_bool(OrderedName("spike_shoes"), "Spike Shoes", "", true)
-register_option_bool(OrderedName("spring_shoes"), "Spring Shoes", "", false)
-
-register_option_bool(OrderedName("bomb_paste"), "Bomb Paste", "", true)
-register_option_bool(OrderedName("pitchers_mitt"), "Pitcher's Mitt", "", false)
-
-register_option_bool(OrderedName("eggplant_crown"), "Eggplant Crown", "", false)
-register_option_bool(OrderedName("true_crown"), "True Crown", "", false)
 
 local levelCounter = 0
 local spawnPortalHitbox = nil
@@ -121,8 +126,6 @@ set_callback(function()
   end
 
   if state.world_next == 7 and state.level_next == 5 then
-    --print(F 'backwear on index {inspect(backwear[options[OrderedName("backwear")])}')]
-
     local player = get_player(1, false)
 
     player.health = options[OrderedName("health")]
@@ -139,22 +142,15 @@ set_callback(function()
       pick_up(player.uid, spawn(selectedHeldItem, 0, 0, LAYER.PLAYER, 0, 0))
     end
 
-    if options[OrderedName("ankh")] then player:give_powerup(ENT_TYPE.ITEM_POWERUP_ANKH) end
-    if options[OrderedName("kapala")] then player:give_powerup(ENT_TYPE.ITEM_POWERUP_KAPALA) end
-    if options[OrderedName("alien_compass")] then player:give_powerup(ENT_TYPE.ITEM_POWERUP_SPECIALCOMPASS) end
+    for _, powerup in pairs(powerups) do
+      if options[OrderedName(powerup[1])] then
+        player:give_powerup(powerup[5])
+      end
+    end
+
     if options[OrderedName("elixir")] then
       pick_up(player.uid, spawn(ENT_TYPE.ITEM_PICKUP_ELIXIR, 0, 0, LAYER.FRONT, 0, 0))
     end
-
-    if options[OrderedName("climbing_gloves")] then player:give_powerup(ENT_TYPE.ITEM_POWERUP_CLIMBING_GLOVES) end
-    if options[OrderedName("spike_shoes")] then player:give_powerup(ENT_TYPE.ITEM_POWERUP_SPIKE_SHOES) end
-    if options[OrderedName("spring_shoes")] then player:give_powerup(ENT_TYPE.ITEM_POWERUP_SPRING_SHOES) end
-
-    if options[OrderedName("bomb_paste")] then player:give_powerup(ENT_TYPE.ITEM_POWERUP_PASTE) end
-    if options[OrderedName("pitchers_mitt")] then player:give_powerup(ENT_TYPE.ITEM_POWERUP_PITCHERSMITT) end
-
-    if options[OrderedName("eggplant_crown")] then player:give_powerup(ENT_TYPE.ITEM_POWERUP_EGGPLANTCROWN) end
-    if options[OrderedName("true_crown")] then player:give_powerup(ENT_TYPE.ITEM_POWERUP_TRUECROWN) end
   end
 
   levelCounter = levelCounter + 1
