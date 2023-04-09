@@ -3,6 +3,22 @@ meta.version = "0.1"
 meta.description = "Sandbox"
 meta.author = "Jools"
 
+local orderPrefix = 1
+OptionNameLookup = {}
+function OrderedName(name)
+  -- return existing
+  local existing = OptionNameLookup[name]
+  if existing ~= nil then
+    return existing
+  end
+
+  -- add new
+  local orderedName = string.format("%03i_%s", orderPrefix, name)
+  OptionNameLookup[name] = orderedName
+  orderPrefix = orderPrefix + 1
+  return orderedName
+end
+
 backwear = {
   { 0,                                 "None" },
   { ENT_TYPE.ITEM_JETPACK,             "Jetpack" },
@@ -31,33 +47,36 @@ heldItems = {
   { ENT_TYPE.ITEM_CAMERA,          "Camera" },
 }
 
+register_option_int(OrderedName("health"), "Health", "", 20, 1, 99)
+register_option_int(OrderedName("bombs"), "Bombs", "", 20, 1, 99)
+register_option_int(OrderedName("ropes"), "Ropes", "", 20, 1, 99)
+
 local backwearOptions = ""
 for _, item in pairs(backwear) do
   backwearOptions = backwearOptions .. item[2] .. "\0"
 end
-register_option_combo("backwear", "Backwear", "", backwearOptions .. "\0", 1)
+register_option_combo(OrderedName("backwear"), "Backwear", "", backwearOptions .. "\0", 1)
 
 local heldItemOptions = ""
 for _, item in pairs(heldItems) do
   heldItemOptions = heldItemOptions .. item[2] .. "\0"
 end
-register_option_combo("heldItem", "Held item", "", heldItemOptions .. "\0", 1)
+register_option_combo(OrderedName("heldItem"), "Held item", "", heldItemOptions .. "\0", 1)
 
-register_option_bool("kapala", "Kapala", "", true)
-register_option_bool("spike_shoes", "Spike Shoes", "", true)
-register_option_bool("ankh", "Ankh", "", true)
-register_option_bool("elixir", "Elixir", "", true)
-register_option_bool("alien_compass", "Alien Compass", "", true)
-register_option_bool("eggplant_crown", "Eggplant Crown", "", true)
-register_option_bool("climbing_gloves", "Climbing Gloves", "", false)
-register_option_bool("true_crown", "True Crown", "", false)
-register_option_bool("pitchers_mitt", "Pitcher's Mitt", "", false)
-register_option_bool("bomb_paste", "Bomb Paste", "", false)
-register_option_bool("spring_shoes", "Spring Shoes", "", false)
+register_option_bool(OrderedName("ankh"), "Ankh", "", true)
+register_option_bool(OrderedName("kapala"), "Kapala", "", true)
+register_option_bool(OrderedName("alien_compass"), "Alien Compass", "", true)
+register_option_bool(OrderedName("elixir"), "Elixir", "", true)
 
-register_option_int("health", "Health", "", 20, 1, 99)
-register_option_int("bombs", "Bombs", "", 20, 1, 99)
-register_option_int("ropes", "Ropes", "", 20, 1, 99)
+register_option_bool(OrderedName("climbing_gloves"), "Climbing Gloves", "", false)
+register_option_bool(OrderedName("spike_shoes"), "Spike Shoes", "", true)
+register_option_bool(OrderedName("spring_shoes"), "Spring Shoes", "", false)
+
+register_option_bool(OrderedName("bomb_paste"), "Bomb Paste", "", true)
+register_option_bool(OrderedName("pitchers_mitt"), "Pitcher's Mitt", "", false)
+
+register_option_bool(OrderedName("eggplant_crown"), "Eggplant Crown", "", false)
+register_option_bool(OrderedName("true_crown"), "True Crown", "", false)
 
 local levelCounter = 0
 local spawnPortalHitbox = nil
@@ -86,7 +105,6 @@ set_callback(function()
       state.level_start = 5
       state.theme_start = THEME.COSMIC_OCEAN
 
-      -- reset the hitbox to avoid collision detection every frame until ON.CAMP happens again
       spawnPortalHitbox = nil
     end
   end
@@ -97,39 +115,47 @@ set_callback(function()
 end, ON.RESET)
 
 set_callback(function()
-  if levelCounter ~= 0 then -- only spawn items in case the shortcut was taken, not when CO was reached legitimately
+  -- only spawn items in case the shortcut was taken, not when CO was reached legitimately
+  if levelCounter ~= 0 then
     return
   end
 
   if state.world_next == 7 and state.level_next == 5 then
-    print(F 'backwear on index {inspect(backwear[options.backwear])}')
+    --print(F 'backwear on index {inspect(backwear[options[OrderedName("backwear")])}')]
 
     local player = get_player(1, false)
-    if options.kapala then player:give_powerup(ENT_TYPE.ITEM_POWERUP_KAPALA) end
-    if options.spike_shoes then player:give_powerup(ENT_TYPE.ITEM_POWERUP_SPIKE_SHOES) end
-    if options.ankh then player:give_powerup(ENT_TYPE.ITEM_POWERUP_ANKH) end
-    if options.alien_compass then player:give_powerup(ENT_TYPE.ITEM_POWERUP_SPECIALCOMPASS) end
-    if options.eggplant_crown then player:give_powerup(ENT_TYPE.ITEM_POWERUP_EGGPLANTCROWN) end
-    if options.climbing_gloves then player:give_powerup(ENT_TYPE.ITEM_POWERUP_CLIMBING_GLOVES) end
-    if options.true_crown then player:give_powerup(ENT_TYPE.ITEM_POWERUP_TRUECROWN) end
-    if options.pitchers_mitt then player:give_powerup(ENT_TYPE.ITEM_POWERUP_PITCHERSMITT) end
-    if options.bomb_paste then player:give_powerup(ENT_TYPE.ITEM_POWERUP_PASTE) end
-    if options.spring_shoes then player:give_powerup(ENT_TYPE.ITEM_POWERUP_SPRING_SHOES) end
-    if options.elixir then pick_up(player.uid, spawn(ENT_TYPE.ITEM_PICKUP_ELIXIR, 0, 0, LAYER.FRONT, 0, 0)) end
 
-    local selectedBackwear = backwear[options.backwear][1]
+    player.health = options[OrderedName("health")]
+    player.inventory.bombs = options[OrderedName("bombs")]
+    player.inventory.ropes = options[OrderedName("ropes")]
+
+    local selectedBackwear = backwear[options[OrderedName("backwear")]][1]
     if selectedBackwear > 0 then
       pick_up(player.uid, spawn(selectedBackwear, 0, 0, LAYER.PLAYER, 0, 0))
     end
 
-    local selectedHeldItem = heldItems[options.heldItem][1]
+    local selectedHeldItem = heldItems[options[OrderedName("heldItem")]][1]
     if selectedHeldItem > 0 then
       pick_up(player.uid, spawn(selectedHeldItem, 0, 0, LAYER.PLAYER, 0, 0))
     end
 
-    player.health = options.health
-    player.inventory.bombs = options.bombs
-    player.inventory.ropes = options.ropes
+    if options[OrderedName("ankh")] then player:give_powerup(ENT_TYPE.ITEM_POWERUP_ANKH) end
+    if options[OrderedName("kapala")] then player:give_powerup(ENT_TYPE.ITEM_POWERUP_KAPALA) end
+    if options[OrderedName("alien_compass")] then player:give_powerup(ENT_TYPE.ITEM_POWERUP_SPECIALCOMPASS) end
+    if options[OrderedName("elixir")] then
+      pick_up(player.uid, spawn(ENT_TYPE.ITEM_PICKUP_ELIXIR, 0, 0, LAYER.FRONT, 0, 0))
+    end
+
+    if options[OrderedName("climbing_gloves")] then player:give_powerup(ENT_TYPE.ITEM_POWERUP_CLIMBING_GLOVES) end
+    if options[OrderedName("spike_shoes")] then player:give_powerup(ENT_TYPE.ITEM_POWERUP_SPIKE_SHOES) end
+    if options[OrderedName("spring_shoes")] then player:give_powerup(ENT_TYPE.ITEM_POWERUP_SPRING_SHOES) end
+
+    if options[OrderedName("bomb_paste")] then player:give_powerup(ENT_TYPE.ITEM_POWERUP_PASTE) end
+    if options[OrderedName("pitchers_mitt")] then player:give_powerup(ENT_TYPE.ITEM_POWERUP_PITCHERSMITT) end
+
+    if options[OrderedName("eggplant_crown")] then player:give_powerup(ENT_TYPE.ITEM_POWERUP_EGGPLANTCROWN) end
+    if options[OrderedName("true_crown")] then player:give_powerup(ENT_TYPE.ITEM_POWERUP_TRUECROWN) end
   end
+
   levelCounter = levelCounter + 1
 end, ON.LEVEL)
