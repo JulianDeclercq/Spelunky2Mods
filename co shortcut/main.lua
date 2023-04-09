@@ -1,25 +1,26 @@
-meta.name = "Julle Development"
-meta.version = "0.1"
-meta.description = "Sandbox"
+meta.name = "Cosmic Ocean Portal"
+meta.version = "1.0"
+meta.description =
+"Opens a portal to the Cosmic Ocean from the telescope at the Camp. It is said to grant customizable items and power-ups upon entering..."
 meta.author = "Jools"
 
 local orderPrefix = 1
-OptionNameLookup = {}
+local optionNameLookup = {}
 function OrderedName(name)
   -- return existing
-  local existing = OptionNameLookup[name]
+  local existing = optionNameLookup[name]
   if existing ~= nil then
     return existing
   end
 
   -- add new
   local orderedName = string.format("%03i_%s", orderPrefix, name)
-  OptionNameLookup[name] = orderedName
+  optionNameLookup[name] = orderedName
   orderPrefix = orderPrefix + 1
   return orderedName
 end
 
-backwear = {
+local backwear <const> = {
   { 0,                                 "None" },
   { ENT_TYPE.ITEM_JETPACK,             "Jetpack" },
   { ENT_TYPE.ITEM_VLADS_CAPE,          "Vlad's Cape" },
@@ -29,7 +30,7 @@ backwear = {
   { ENT_TYPE.ITEM_POWERPACK,           "Powerpack" },
 }
 
-heldItems = {
+local heldItems <const> = {
   { 0,                             "None" },
   { ENT_TYPE.ITEM_EXCALIBUR,       "Excalibur" },
   { ENT_TYPE.ITEM_PLASMACANNON,    "Plasma Cannon" },
@@ -47,7 +48,7 @@ heldItems = {
   { ENT_TYPE.ITEM_CAMERA,          "Camera" },
 }
 
-powerups = {
+local powerups <const> = {
   { "ankh",            "Ankh",            "", true,  ENT_TYPE.ITEM_POWERUP_ANKH },
   { "kapala",          "Kapala",          "", true,  ENT_TYPE.ITEM_POWERUP_KAPALA },
   { "alien_compass",   "Alien Compass",   "", true,  ENT_TYPE.ITEM_POWERUP_SPECIALCOMPASS },
@@ -93,6 +94,10 @@ set_callback(function()
 end, ON.CAMP)
 
 set_callback(function()
+  levelCounter = 0
+end, ON.RESET)
+
+set_callback(function()
   if spawnPortalHitbox == nil then
     return
   end
@@ -114,10 +119,6 @@ set_callback(function()
     end
   end
 end, ON.GAMEFRAME)
-
-set_callback(function()
-  levelCounter = 0
-end, ON.RESET)
 
 set_callback(function()
   -- only spawn items in case the shortcut was taken, not when CO was reached legitimately
@@ -149,7 +150,11 @@ set_callback(function()
     end
 
     if options[OrderedName("elixir")] then
-      pick_up(player.uid, spawn(ENT_TYPE.ITEM_PICKUP_ELIXIR, 0, 0, LAYER.FRONT, 0, 0))
+      local x, y, layer = get_position(player.uid)
+      spawn(ENT_TYPE.ITEM_PICKUP_ELIXIR, x, y, layer, 0, 0)
+
+      -- let the player start on the health they selected, so remove the health the elixir gives on pickup
+      player.health = player.health - 8
     end
   end
 
