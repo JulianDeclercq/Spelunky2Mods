@@ -1,7 +1,7 @@
 meta.name = "Cosmic Ocean Portal"
 meta.version = "1.0"
 meta.description =
-"Opens a portal to the Cosmic Ocean from the telescope at the Camp. It is said to grant customizable items and power-ups upon entering..."
+"Opens a portal to the Cosmic Ocean from the telescope at the Camp. Grants customizable items and power-ups upon entering."
 meta.author = "Jools"
 
 local orderPrefix = 1
