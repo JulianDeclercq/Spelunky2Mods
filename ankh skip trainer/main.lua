@@ -36,10 +36,6 @@ for _, backwear in pairs(backwear) do
     backwearOptions = backwearOptions .. backwear[2] .. "\0"
 end
 
-register_option_bool(OrderedName("tint"), "Show green overlay",
-    "Displays the player in green when they are on the correct position for the 4 bombs Pitcher's Mitt skip.",
-    true)
-
 register_option_combo(OrderedName("backwear"), "Backwear", "", backwearOptions .. "\0", 2)
 
 register_option_int(OrderedName("bombs"), "Bombs", "", 4, 1, 99)
@@ -98,32 +94,3 @@ set_callback(function()
         pick_up(player.uid, spawn(ENT_TYPE.ITEM_TELEPORTER, 0, 0, LAYER.PLAYER, 0, 0))
     end
 end, ON.LEVEL)
-
-set_callback(function()
-    if state.world ~= skip.World and state.level ~= skip.Level then
-        return
-    end
-
-    -- start every frame with default player color to enable toggling the option while playing
-    local player = get_player(1, false)
-    player.color:set_rgba(255, 255, 255, 255)
-
-    -- color the player green if in the correct position for the 4 bomb Pitcher's Mitt skip
-    if options[OrderedName("tint")] and options[OrderedName("pitchers_mitt")] then
-        if CorrectMittPosition(player.uid) then
-            player.color:set_rgba(25, 230, 25, 255)
-        end
-    end
-end, ON.FRAME)
-
--- credit to @fienestar for the correct values, only Mitt since the 4 bomb non-mitt skip has the consistent block lineup
-function CorrectMittPosition(playerUid)
-    local x, y, l = get_position(playerUid)
-
-    -- check correct row
-    if not (81 <= y and y <= 82 and l == LAYER.FRONT) then
-        return false
-    end
-
-    return 22.233 <= x and x <= 22.36
-end
