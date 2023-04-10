@@ -34,6 +34,11 @@ local backwearOptions = ""
 for _, backwear in pairs(backwear) do
     backwearOptions = backwearOptions .. backwear[2] .. "\0"
 end
+
+register_option_bool(OrderedName("tint"), "Show green overlay",
+    "Displays the player in green when they are on the correct position for the 4 bombs Pitcher's Mitt skip.",
+    true)
+
 register_option_combo(OrderedName("backwear"), "Backwear", "", backwearOptions .. "\0", 2)
 
 register_option_int(OrderedName("bombs"), "Bombs", "", 4, 1, 99)
@@ -41,8 +46,10 @@ register_option_int(OrderedName("ropes"), "Ropes", "", 4, 1, 99)
 register_option_bool(OrderedName("bomb_paste"), "Bomb Paste", "", false)
 register_option_bool(OrderedName("pitchers_mitt"), "Pitcher's Mitt", "", false)
 register_option_bool(OrderedName("climbing_gloves"), "Climbing Gloves", "", false)
+register_option_bool(OrderedName("teleporter"), "Teleporter", "", false)
 
 set_callback(function()
+    -- on going through the main door in camp
     if state.loading == 1 and state.screen_next == ON.LEVEL
         and state.world_next == 1 and state.level_next == 1 and state.theme_next == THEME.DWELLING then
         state.world_next = skip.World
@@ -56,8 +63,13 @@ set_callback(function()
     end
 end, ON.LOADING)
 
+local callbackId = nil
 set_callback(function()
     if state.world ~= skip.World and state.level ~= skip.Level then
+        if callbackId ~= nil then
+            clear_callback(callbackId)
+            callbackId = nil
+        end
         return
     end
 
@@ -85,4 +97,35 @@ set_callback(function()
     if selectedBackwear > 0 then
         pick_up(player.uid, spawn(selectedBackwear, 0, 0, LAYER.PLAYER, 0, 0))
     end
+
+    if options[OrderedName("teleporter")] then
+        pick_up(player.uid, spawn(ENT_TYPE.ITEM_TELEPORTER, 0, 0, LAYER.PLAYER, 0, 0))
+    end
+
+    -- color the player green if in the correct position for the 4 bomb Pitcher's Mitt skip
+    if options[OrderedName("tint")] and options[OrderedName("pitchers_mitt")] then
+        callbackId = set_callback(function()
+            if CorrectPosition(player.uid) then
+                player.color:set_rgba(25, 230, 25, 255)
+            else
+                player.color:set_rgba(255, 255, 255, 255)
+            end
+        end, ON.FRAME)
+    end
 end, ON.LEVEL)
+
+-- credit to @fienestar for the numbers
+function CorrectPosition(playerUid)
+    local x, y, l = get_position(playerUid)
+
+    -- check correct row
+    if not (81 <= y and y <= 82 and l == LAYER.FRONT) then
+        return false
+    end
+
+    if options[OrderedName("pitchers_mitt")] then
+        return 22.233 <= x and x <= 22.36
+    else
+        return 21.79 <= x and x <= 21.90
+    end
+end
