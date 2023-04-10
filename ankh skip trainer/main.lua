@@ -1,7 +1,8 @@
-meta.name = '__JULLE DEVELOPMENT'
-meta.version = '1.0'
-meta.description = ''
-meta.author = 'Jools'
+meta.name = "Ankh Skip Trainer"
+meta.version = "1.0"
+meta.description =
+"Lets you practise various Ankh Skip situations easily. Includes all backwear, paste, pitcher's mitt and teleporter. "
+meta.author = "Jools"
 
 local skip = { World = 5, Level = 3, Theme = THEME.TIDE_POOL }
 local orderPrefix = 1
@@ -63,19 +64,14 @@ set_callback(function()
     end
 end, ON.LOADING)
 
-local callbackId = nil
 set_callback(function()
     if state.world ~= skip.World and state.level ~= skip.Level then
-        if callbackId ~= nil then
-            clear_callback(callbackId)
-            callbackId = nil
-        end
         return
     end
 
     local player = get_player(1, false)
 
-    --put the player on top the idol
+    -- put the player on top of the idol
     player:set_position(22.5, 81)
 
     player.inventory.bombs = options[OrderedName("bombs")]
@@ -101,21 +97,27 @@ set_callback(function()
     if options[OrderedName("teleporter")] then
         pick_up(player.uid, spawn(ENT_TYPE.ITEM_TELEPORTER, 0, 0, LAYER.PLAYER, 0, 0))
     end
+end, ON.LEVEL)
+
+set_callback(function()
+    if state.world ~= skip.World and state.level ~= skip.Level then
+        return
+    end
+
+    -- start every frame with default player color to enable toggling the option while playing
+    local player = get_player(1, false)
+    player.color:set_rgba(255, 255, 255, 255)
 
     -- color the player green if in the correct position for the 4 bomb Pitcher's Mitt skip
     if options[OrderedName("tint")] and options[OrderedName("pitchers_mitt")] then
-        callbackId = set_callback(function()
-            if CorrectPosition(player.uid) then
-                player.color:set_rgba(25, 230, 25, 255)
-            else
-                player.color:set_rgba(255, 255, 255, 255)
-            end
-        end, ON.FRAME)
+        if CorrectMittPosition(player.uid) then
+            player.color:set_rgba(25, 230, 25, 255)
+        end
     end
-end, ON.LEVEL)
+end, ON.FRAME)
 
--- credit to @fienestar for the numbers
-function CorrectPosition(playerUid)
+-- credit to @fienestar for the correct values, only Mitt since the 4 bomb non-mitt skip has the consistent block lineup
+function CorrectMittPosition(playerUid)
     local x, y, l = get_position(playerUid)
 
     -- check correct row
@@ -123,9 +125,5 @@ function CorrectPosition(playerUid)
         return false
     end
 
-    if options[OrderedName("pitchers_mitt")] then
-        return 22.233 <= x and x <= 22.36
-    else
-        return 21.79 <= x and x <= 21.90
-    end
+    return 22.233 <= x and x <= 22.36
 end
