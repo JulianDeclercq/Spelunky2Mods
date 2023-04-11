@@ -105,7 +105,6 @@ function SkipCutscene()
 end
 
 function LoadPhase(phase)
-    print(F 'loading phase {phase.name}')
     -- global timeout is needed since the cutscene interferes with things the first 2 frames
     set_global_timeout(function()
         local olmec = get_entity(get_entities_by({ ENT_TYPE.ACTIVEFLOOR_OLMEC }, MASK.ANY, LAYER.FRONT)[1])
