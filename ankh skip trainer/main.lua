@@ -1,7 +1,7 @@
 meta.name = "Ankh Skip Trainer"
 meta.version = "1.0"
 meta.description =
-"Lets you practise various Ankh Skip situations easily. Includes all backwear, paste, pitcher's mitt and teleporter. "
+"Lets you practise various Ankh Skip situations easily. Includes all backwear, paste, pitcher's mitt and teleporter."
 meta.author = "Jools"
 
 local skip = { World = 5, Level = 3, Theme = THEME.TIDE_POOL }
