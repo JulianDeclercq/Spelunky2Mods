@@ -31,8 +31,6 @@ local backwear <const> = {
     { ENT_TYPE.ITEM_POWERPACK,           name = "Powerpack" },
 }
 
---  0 = stomp, 1 = bombs, 2 = stomp+ufos, 3 = in lava
--- attack phase, dropdown name
 local phases <const> = {
     {
         olmecPosition = { x = 24.5, y = 112.5 },
