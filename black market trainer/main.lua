@@ -1,7 +1,7 @@
 meta.name = "Black Market Trainer"
 meta.version = "1.0"
 meta.description =
-"Practise robbing the black market. Offers a variaty of items to start with and displays your shopkeeper aggro number."
+"Practise robbing the black market. Offers a variety of items to start with and displays your shopkeeper aggro number."
 meta.author = "Jools"
 
 local WORLD_JUNGLE = 2
