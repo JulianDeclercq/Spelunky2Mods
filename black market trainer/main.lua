@@ -156,17 +156,24 @@ local framesToDrawBigger = 0.0
 local framesToDrawBiggerStart = 0.0 -- used to calculate animation progress
 local animationProgress = 0.0
 set_callback(function(draw_ctx)
+    -- don't draw in main menu etc.
+    if state.world < 2 or state.shoppie_aggro_next == 0 then
+        return
+    end
+
     local color = { r = 255, g = 255, b = 255, a = 255 } -- white
-    local size = 25
+    local _, windowH = get_window_size()
+    local size = math.floor(windowH / 20.0)
 
     if framesToDrawBigger > 0 then
         color = RedWhiteLerp(animationProgress)
-        size = Lerp(35, 25, animationProgress)
+        size = Lerp(math.floor(windowH / 15.0), math.floor(windowH / 20.0), animationProgress)
     end
 
-    local text = F 'Shop keeper aggro {state.shoppie_aggro_next}'
+    local text = F 'Shop keeper aggro: {state.shoppie_aggro_next}'
     local w, h = draw_text_size(size, text)
-    draw_ctx:draw_text(1 - w, -1 - h, size, text, rgba(color.r, color.g, color.b, color.a)) -- right bottom corner
+    local margin = 0.05
+    draw_ctx:draw_text(1 - w - margin, -1 - h + margin, size, text, rgba(color.r, color.g, color.b, color.a)) -- right bottom corner
 end, ON.GUIFRAME)
 
 set_callback(function()
