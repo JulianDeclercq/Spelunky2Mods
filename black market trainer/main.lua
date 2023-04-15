@@ -1,7 +1,7 @@
 meta.name = "Black Market Trainer"
 meta.version = "1.0"
 meta.description =
-"Practise robbing the black market. Offers a variety of items to start with and displays your shopkeeper aggro number."
+"Practise robbing the black market. Offers a variaty of items to start with and displays your shopkeeper aggro number."
 meta.author = "Jools"
 
 local WORLD_JUNGLE = 2
@@ -82,6 +82,7 @@ register_option_int(OrderedName("ropes"), "Ropes", "", 4, 0, 99)
 register_option_bool(OrderedName("bomb_paste"), "Bomb Paste", "", false)
 register_option_bool(OrderedName("pitchers_mitt"), "Pitcher's Mitt", "", false)
 register_option_bool(OrderedName("climbing_gloves"), "Climbing Gloves", "", false)
+register_option_bool(OrderedName("show_aggro"), "Show Shopkeeper Aggro", "", true)
 
 function GearPlayer()
     local player = get_player(1, false)
@@ -156,6 +157,10 @@ local framesToDrawBigger = 0.0
 local framesToDrawBiggerStart = 0.0 -- used to calculate animation progress
 local animationProgress = 0.0
 set_callback(function(draw_ctx)
+    if not options[OrderedName("show_aggro")] then
+        return
+    end
+
     -- don't draw in main menu etc.
     if state.world < 2 or state.shoppie_aggro_next == 0 then
         return
@@ -177,6 +182,10 @@ set_callback(function(draw_ctx)
 end, ON.GUIFRAME)
 
 set_callback(function()
+    if not options[OrderedName("show_aggro")] then
+        return
+    end
+
     local engineFps = 60
     currentAggro = state.shoppie_aggro_next
     if currentAggro > lastAggro then
