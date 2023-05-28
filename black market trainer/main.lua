@@ -1,12 +1,13 @@
 meta.name = "Black Market Trainer"
-meta.version = "1.0"
+meta.version = "1.1"
 meta.description =
 "Practise robbing the black market. Offers a variaty of items to start with and displays your shopkeeper aggro number."
 meta.author = "Jools"
 
 local WORLD_JUNGLE = 2
-local firstPossibleBlackMarketLevel = 2
-local currentLevel = firstPossibleBlackMarketLevel
+
+-- If black market hasn't spawned yet, the game will force spawn in the last possible level, so start there. (2-4 in case of the Black Market)
+local targetLevel = 4
 
 local blackMarket = { x = 30, y = 86 }
 
@@ -113,26 +114,15 @@ function GearPlayer()
     end
 end
 
-local visitedBlackMarket = false
 set_callback(function()
-    if state.world ~= WORLD_JUNGLE or state.theme ~= THEME.JUNGLE or visitedBlackMarket then
+    if state.world ~= WORLD_JUNGLE or state.theme ~= THEME.JUNGLE or not test_flag(state.presence_flags, PRESENCE_FLAG.BLACK_MARKET) then
         return
     end
 
-    if currentLevel == firstPossibleBlackMarketLevel then
-        GearPlayer()
-    end
-
-    if test_flag(state.presence_flags, PRESENCE_FLAG.BLACK_MARKET) then
-        local player = get_player(1, false)
-        player:set_layer(LAYER.BACK)
-        player:set_position(blackMarket.x, blackMarket.y)
-        visitedBlackMarket = true
-    else
-        -- warp to the next level and check for the black market there
-        currentLevel = currentLevel + 1
-        warp(WORLD_JUNGLE, currentLevel, THEME.JUNGLE)
-    end
+    GearPlayer()
+    local player = get_player(1, false)
+    player:set_layer(LAYER.BACK)
+    player:set_position(blackMarket.x, blackMarket.y)
 end, ON.LEVEL)
 
 set_callback(function()
@@ -140,12 +130,12 @@ set_callback(function()
     if state.loading == 1 and state.screen_next == ON.LEVEL
         and state.world_next == 1 and state.level_next == 1 and state.theme_next == THEME.DWELLING then
         state.world_next = WORLD_JUNGLE
-        state.level_next = firstPossibleBlackMarketLevel
+        state.level_next = targetLevel
         state.theme_next = THEME.JUNGLE
 
         -- for instant restart
         state.world_start = WORLD_JUNGLE
-        state.level_start = firstPossibleBlackMarketLevel
+        state.level_start = targetLevel
         state.theme_start = THEME.JUNGLE
     end
 end, ON.LOADING)
@@ -201,8 +191,6 @@ set_callback(function()
 end, ON.GAMEFRAME)
 
 set_callback(function()
-    currentLevel = firstPossibleBlackMarketLevel
-    visitedBlackMarket = false
     lastAggro = 0
     currentAggro = 0
     framesToDrawBigger = 0.0
