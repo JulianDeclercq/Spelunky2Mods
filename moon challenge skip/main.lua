@@ -4,43 +4,47 @@ meta.description =
 "Skip the moon challenge"
 meta.author = "Jools"
 
-local bowMoved = false
+local finished = false
 set_callback(function()
-    local moonChallenge = state.logic.tun_moon_challenge
-    if moonChallenge == nil then
+    if not test_flag(state.presence_flags, PRESENCE_FLAG.MOON_CHALLENGE) then
         return
     end
 
-    local player = get_player(1, false)
-    
-    -- if moonChallenge object is defined it means the player has paid for the moon challenge
-    if moonChallenge and player.layer == LAYER.BACK and not bowMoved then
-        -- locate the clover
-        local clovers = get_entities_by({ ENT_TYPE.ITEM_PICKUP_CLOVER }, MASK.ANY, LAYER.BACK)
-        if #clovers > 1 then
-            print("Unexpected amount of clovers: " .. #clovers)
-            return
-        end
-
-        -- move the bow to the clover 
-        local bows = get_entities_by({ ENT_TYPE.ITEM_HOUYIBOW }, MASK.ANY, LAYER.BACK)
-        if #bows ~= 1 then
-            print("Unexpected amount of bows: " .. #bows)
-            return
-        end
-
-        local bow = get_entity(bows[1])
-        local cloverX, cloverY = get_position(clovers[1])
-        bow:set_position(cloverX, cloverY)
-        bowMoved = true
+    -- locate the clover
+    local clovers = get_entities_by({ ENT_TYPE.ITEM_PICKUP_CLOVER }, MASK.ANY, LAYER.BACK)
+    if #clovers > 1 then
+        print("Unexpected amount of clovers: " .. #clovers)
+        return
     end
 
-    -- kill the mattock to finish the challenge after the bow has moved
-    if bowMoved and moonChallenge.forcefield_countdown == 0 then
-        kill_entity(moonChallenge.mattock_uid)
-    end 
+    -- move the bow to the clover 
+    local bows = get_entities_by({ ENT_TYPE.ITEM_HOUYIBOW }, MASK.ANY, LAYER.BACK)
+    if #bows ~= 1 then
+        print("Unexpected amount of bows: " .. #bows)
+        return
+    end
+
+    local bow = get_entity(bows[1])
+    local cloverX, cloverY = get_position(clovers[1])
+    bow:set_position(cloverX, cloverY)
+end, ON.LEVEL)
+
+set_callback(function()
+    if finished or not test_flag(state.presence_flags, PRESENCE_FLAG.MOON_CHALLENGE) then
+        return
+    end
+
+    -- delete the mattock when the player picks up the bow to immediately end the challenge
+    local player = get_player(1, false)
+    if player.holding_uid then
+        held_entity = get_entity(player.holding_uid)
+        if held_entity and held_entity.type.id == ENT_TYPE.ITEM_HOUYIBOW then
+            kill_entity(state.logic.tun_moon_challenge.mattock_uid)
+            finished = true
+        end
+    end
 end, ON.PRE_UPDATE)
 
 set_callback(function()
-    bowMoved = false
+    finished = false
 end, ON.RESET)
