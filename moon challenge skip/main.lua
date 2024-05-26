@@ -17,16 +17,33 @@ set_callback(function()
        -- replace the clover with the bow 
         print("Player has entered the moonchallenge itself after having paid")
         print("forcefield countdown is " .. moonChallenge.forcefield_countdown)
+        
         -- item_pickup_clover
         local clovers = get_entities_by({ ENT_TYPE.ITEM_PICKUP_CLOVER }, MASK.ANY, LAYER.BACK)
-        for i, clover in ipairs(clovers) do
-            print("clover id " .. clover)
-            local ent = get_entity(clover)
-            local clovX, clovY = get_position(clover)
-            player:set_position(clovX, clovY)
+        if #clovers ~= 1 then
+            print("more than 1 clover found, exiting")
+            return
         end
-        --get_position()
+
+        for i, clover in ipairs(clovers) do
+            print("clover id from loop " .. clover)
+            print("clover id from type " .. type(clover))
+        end
+
+        local clover = clovers[1] 
+        local cloverX, cloverY = get_position(clovers[1])
+        
+        -- get the bow
+        local bows = get_entities_by({ ENT_TYPE.ITEM_HOUYIBOW }, MASK.ANY, LAYER.BACK)
+        if #bows ~= 1 then
+            print("more than 1 bow found, exiting")
+            return
+        end
+
+        local bowEnt = get_entity(bows[1])
+        bowEnt:set_position(cloverX, cloverY)
     end
+    
     if moonChallenge.challenge_active then
         print("moon challenge is ACTIVE!")
         print("mattock uuid " .. moonChallenge.mattock_uid)
