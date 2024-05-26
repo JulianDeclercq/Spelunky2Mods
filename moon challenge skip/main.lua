@@ -1,7 +1,7 @@
 meta.name = "Moon Challenge Skip"
 meta.version = "1.0"
 meta.description =
-"Skip the moon challenge"
+"Skip the mattock part of the moon challenge."
 meta.author = "Jools"
 
 local finished = false
@@ -34,16 +34,13 @@ set_callback(function()
         return
     end
 
-    -- delete the mattock when the player picks up the bow to immediately end the challenge
-    local player = get_player(1, false)
-    if player.holding_uid then
-        held_entity = get_entity(player.holding_uid)
-        if held_entity and held_entity.type.id == ENT_TYPE.ITEM_HOUYIBOW then
-            kill_entity(state.logic.tun_moon_challenge.mattock_uid)
-            finished = true
-        end
+    local moonChallenge = state.logic.tun_moon_challenge
+    if moonChallenge then
+        kill_entity(moonChallenge.mattock_uid)
+        finished = true
+        return
     end
-end, ON.PRE_UPDATE)
+end, ON.GAMEFRAME)
 
 set_callback(function()
     finished = false
