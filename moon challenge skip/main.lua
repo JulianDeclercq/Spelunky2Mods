@@ -8,10 +8,7 @@ local bowMoved = false
 set_callback(function()
     local moonChallenge = state.logic.tun_moon_challenge
     if moonChallenge == nil then
-        print("moon challenge NOT defined")
         return
-    else
-        print("moon challenge DEFINED")
     end
 
     local player = get_player(1, false)
@@ -38,36 +35,12 @@ set_callback(function()
         bowMoved = true
     end
 
-    -- when the player has picked up the bow and the challenge has started, kill the mattock to finish the challenge
+    -- kill the mattock to finish the challenge after the bow has moved
     if bowMoved and moonChallenge.forcefield_countdown == 0 then
-        if player.holding_uid then
-            held_entity = get_entity(player.holding_uid)
-            if held_entity and held_entity.type.id == ENT_TYPE.ITEM_HOUYIBOW then
-                kill_entity(moonChallenge.mattock_uid)
-                return
-            end
-        end
+        kill_entity(moonChallenge.mattock_uid)
     end 
 end, ON.PRE_UPDATE)
 
 set_callback(function()
-    local player = get_player(1, false)
-    player.inventory.money = 100000
-    -- on going through the main door in camp
-    if state.loading == 1 and state.screen_next == ON.LEVEL
-            and state.world_next == 1 and state.level_next == 1 and state.theme_next == THEME.DWELLING then
-        state.world_next = 2
-        state.level_next = 2
-        state.theme_next = THEME.JUNGLE
-
-        -- for instant restart
-        state.world_start = 2
-        state.level_start = 2
-        state.theme_start = THEME.JUNGLE
-    end
-end, ON.LOADING)
-
-set_callback(function()
-    print("reset called")
     bowMoved = false
 end, ON.RESET)
