@@ -4,55 +4,51 @@ meta.description =
 "Skip the moon challenge"
 meta.author = "Jools"
 
+local bowMoved = false
 set_callback(function()
     local moonChallenge = state.logic.tun_moon_challenge
     if moonChallenge == nil then
+        print("moon challenge NOT defined")
         return
+    else
+        print("moon challenge DEFINED")
     end
 
     local player = get_player(1, false)
     
-    -- if moonChallenge object exists it means the player has paid for the moon challenge
-    if moonChallenge and player.layer == LAYER.BACK then
-       -- replace the clover with the bow 
-        print("Player has entered the moonchallenge itself after having paid")
-        print("forcefield countdown is " .. moonChallenge.forcefield_countdown)
-        
-        -- item_pickup_clover
+    -- if moonChallenge object is defined it means the player has paid for the moon challenge
+    if moonChallenge and player.layer == LAYER.BACK and not bowMoved then
+        -- locate the clover
         local clovers = get_entities_by({ ENT_TYPE.ITEM_PICKUP_CLOVER }, MASK.ANY, LAYER.BACK)
-        if #clovers ~= 1 then
-            print("more than 1 clover found, exiting")
+        if #clovers > 1 then
+            print("Unexpected amount of clovers: " .. #clovers)
             return
         end
 
-        for i, clover in ipairs(clovers) do
-            print("clover id from loop " .. clover)
-            print("clover id from type " .. type(clover))
-        end
-
-        local clover = clovers[1] 
-        local cloverX, cloverY = get_position(clovers[1])
-        
-        -- get the bow
+        -- move the bow to the clover 
         local bows = get_entities_by({ ENT_TYPE.ITEM_HOUYIBOW }, MASK.ANY, LAYER.BACK)
         if #bows ~= 1 then
-            print("more than 1 bow found, exiting")
+            print("Unexpected amount of bows: " .. #bows)
             return
         end
 
-        local bowEnt = get_entity(bows[1])
-        bowEnt:set_position(cloverX, cloverY)
+        local bow = get_entity(bows[1])
+        local cloverX, cloverY = get_position(clovers[1])
+        bow:set_position(cloverX, cloverY)
+        bowMoved = true
     end
-    
-    if moonChallenge.challenge_active then
-        print("moon challenge is ACTIVE!")
-        print("mattock uuid " .. moonChallenge.mattock_uid)
-        --kill_entity(moonChallenge.mattock_uid)
-    else
-        --print("moon challenge is NOT active!")
-    end
-end, ON.PRE_UPDATE)
 
+    -- when the player has picked up the bow and the challenge has started, kill the mattock to finish the challenge
+    if bowMoved and moonChallenge.forcefield_countdown == 0 then
+        if player.holding_uid then
+            held_entity = get_entity(player.holding_uid)
+            if held_entity and held_entity.type.id == ENT_TYPE.ITEM_HOUYIBOW then
+                kill_entity(moonChallenge.mattock_uid)
+                return
+            end
+        end
+    end 
+end, ON.PRE_UPDATE)
 
 set_callback(function()
     local player = get_player(1, false)
@@ -70,3 +66,8 @@ set_callback(function()
         state.theme_start = THEME.JUNGLE
     end
 end, ON.LOADING)
+
+set_callback(function()
+    print("reset called")
+    bowMoved = false
+end, ON.RESET)
