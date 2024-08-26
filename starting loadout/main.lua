@@ -44,6 +44,7 @@ local powerups <const> = {
     { "pitchers_mitt",   "Pitcher's Mitt",  "", false, ENT_TYPE.ITEM_POWERUP_PITCHERSMITT },
     { "eggplant_crown",  "Eggplant Crown",  "", false, ENT_TYPE.ITEM_POWERUP_EGGPLANTCROWN },
     { "true_crown",      "True Crown",      "", false, ENT_TYPE.ITEM_POWERUP_TRUECROWN },
+    { "skeleton_key",    "Skeleton Key",    "", false, ENT_TYPE.ITEM_POWERUP_SKELETON_KEY },
 }
 
 local orderPrefix = 1
